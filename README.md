@@ -1,0 +1,2 @@
+# yspots
+POTA spots
