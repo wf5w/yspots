@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+# need both yad and jq for this command to run
+#
+if [ ! $(which yad) ]; then
+  echo "you need yad: do sudo apt install yad"
+  exit 1
+fi
+
+if [ ! $(which jq) ]; then
+  echo "you need jq: do sudo apt install jq"
+  exit 1
+fi
+
+url='https://api.pota.app/spot/activator'
+
+curl -s $url > spots.json 
+n=$(cat spots.json | jq '. [] | {reference: .reference, activator: .activator, freq: .frequency}' | jq '. .reference' | wc -l)
+let n=$(($n - 1))
+
+rm -f temp.out.txt
+#printf "%-8s %-10s %-10s %-6s %s\n" Park Call Freq Loc Grid > temp.out.txt
+
+for s in $(seq 0 $n); do
+  ref=$(cat spots.json | jq ". [$s] | .reference")
+  activator=$(cat spots.json | jq ". [$s] | .activator")
+  freq=$(cat spots.json | jq ". [${s}] | .frequency")
+  loc=$(cat spots.json | jq ". [${s}] | .locationDesc")
+  grid=$(cat spots.json | jq ". [${s}] | .grid6")
+  printf "%-10s %-12s %-12s %-8s %s\n" ${ref} ${activator} ${freq} ${loc} ${grid} | tr -d '"' >> temp.out.txt
+done
+
+txt=( `cat temp.out.txt` )
+yad --list --width 1200 --height 800 --escape-ok --center --fontname "Sans Bold 24" --column Park --column Activator --column Frequency --column Location --column Grid ${txt[@]}
+
+#rm -f temp.out.txt
+rm -f spots.json
