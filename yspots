@@ -31,6 +31,12 @@ for s in $(seq 0 $n); do
   if [ "${mode}" = '""' ]; then
     mode='n/a'
   fi
+  
+  # echo "strlen ${freq} ==> ${#freq}"
+
+  if [ ${#freq} = 6 ]; then        # even though I see 4 chars, #freq reports 6
+    freq="0${freq}"
+  fi
 
   printf "%-10s %-12s %-12s %-8s %-8s %s 16\n" ${ref} ${activator} ${freq} ${mode} ${loc} ${grid} | tr -d '"' >> temp.out.txt
 done
